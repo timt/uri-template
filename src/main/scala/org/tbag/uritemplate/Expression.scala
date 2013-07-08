@@ -6,7 +6,7 @@ import java.net.URLEncoder
 class Expression(val expression: String) {
   //"{" [ operator ] variable-list "}"
   private val (operator, identifiers) = expression.charAt(0).toString match {
-    case op@("+" | "#" | "." | "/" | ";") => (Some(op), expression.replace(op, ""))
+    case op@("+" | "#" | "." | "/" | ";" | "?" | "&") => (Some(op), expression.replace(op, ""))
     case _ => (None, expression)
   }
 
@@ -22,18 +22,20 @@ class Expression(val expression: String) {
       case Some("#") => reservedExpansion(mkString(valuesOnly, "#", Some(",")))
       case Some(".") => mkString(valuesOnly, ".")
       case Some("/") => mkString(valuesOnly, "/")
-      case Some(";") => mkString(withIdentifiers(values), ";")
+      case Some(";") => mkString(withIdentifiers(values, true), ";")
+      case Some("?") => mkString(withIdentifiers(values), "?", Some("&"))
+      case Some("&") => mkString(withIdentifiers(values), "&")
       case Some(op) => valuesOnly.mkString(",")
       case _ => valuesOnly.mkString(",")
     }
   }
 
-  private def withIdentifiers(values: Seq[(String, String)]) = {
+  private def withIdentifiers(values: Seq[(String, String)], suppressSeparatorWhenEmpty: Boolean = false) = {
     values.map(keyValuePair => {
       val key = keyValuePair._1
       val value = keyValuePair._2
       val separator = value match {
-        case "" => ""
+        case "" if (suppressSeparatorWhenEmpty) => ""
         case _ => "="
       }
       key + separator + value

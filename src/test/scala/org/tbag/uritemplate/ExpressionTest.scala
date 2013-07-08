@@ -75,6 +75,25 @@ class ExpressionTest extends Specification {
       "{;x,y}".expand must be equalTo (";x=1024;y=768")
       "{;x,y,empty}".expand must be equalTo (";x=1024;y=768;empty")
     }
+    "Form-style query, ampersand-separated " in {
+      "{?x,y}".expand must be equalTo ("?x=1024&y=768")
+      "{?x,y,empty}".expand must be equalTo ("?x=1024&y=768&empty=")
+    }
+    "Form-style query continuation" in {
+      "{&x}".expand must be equalTo ("&x=1024")
+      "{&x,y,empty}".expand must be equalTo ("&x=1024&y=768&empty=")
+    }
+  }
+
+  "Level 4 examples" should {
+    implicit val variables = Map(
+      "var" -> "value",
+      "hello" -> "Hello World!",
+      "empty" -> "",
+      "path" -> "/foo/bar",
+      "x" -> "1024",
+      "y" -> "768"
+    )
   }
 
 
