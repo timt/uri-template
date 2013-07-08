@@ -61,7 +61,11 @@ class ExpressionTest extends Specification {
     }
     "Fragment expansion with multiple variables" in {
       "{#x,hello,y}".expand(variables) must be equalTo ("#1024,Hello%20World!,768")
-      //        |     |    {#path,x}/here        #/foo/bar,1024/here
+      "{#path,x}".expand(variables) must be equalTo ("#/foo/bar,1024")
+    }
+    "Label expansion, dot-prefixed" in {
+//      "{.var}".expand(variables) must be equalTo ("value")
+      //        |     |    X{.x,y}               X.1024.768
     }
 
   }

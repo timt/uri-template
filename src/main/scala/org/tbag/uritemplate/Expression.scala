@@ -17,11 +17,16 @@ class Expression(val expression: String) {
 
   private def applyOperator(values: Seq[String]) = {
     operator match {
-      case Some("+") => reservedExpansion(values.mkString(","))
-      case Some("#") => s"#${reservedExpansion(values.mkString(","))}"
+      case Some("+") => reservedExpansion(mkString(values, "", ","))
+      case Some("#") => reservedExpansion(mkString(values,"#", ","))
+      case Some(".") => mkString(values, ".", ".")
       case Some(op) => values.mkString(",")
       case _ => values.mkString(",")
     }
+  }
+
+  private def mkString(values: Seq[String], prefix: String, separator: String) = {
+    s"$prefix${values.mkString(separator)}"
   }
 
 
