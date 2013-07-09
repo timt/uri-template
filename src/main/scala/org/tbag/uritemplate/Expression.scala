@@ -12,7 +12,28 @@ class Expression(val expression: String) {
 
 
   def expand(implicit variables: Map[String, Any]) = {
-    applyOperator(identifiers.split(",").map(identifier => (identifier -> encode(variables.getOrElse(identifier, "").toString))))
+    applyOperator(identifiers.split(",").map(identifier => parseToValue(identifier, variables)))
+  }
+
+
+  private def parseToValue(identifier: String, variables: Map[String, Any]): (String, String) = {
+
+    identifier.indexOf(":") match {
+      case -1 => (identifier -> getValue(variables, identifier))
+      case index => {
+        val actualIdentifier = identifier.substring(0, index)
+        val length = identifier.substring(index + 1).toInt
+        (actualIdentifier -> encode(getValue(variables, actualIdentifier).take(length)))
+      }
+    }
+  }
+
+
+  private def getValue(variables: Map[String, Any], identifier: String): String = {
+    variables.getOrElse(identifier, "") match {
+      case list: List[Any] => list.map(encode(_)) mkString (",")
+      case other => encode(other.toString)
+    }
   }
 
   private def applyOperator(values: Seq[(String, String)]) = {

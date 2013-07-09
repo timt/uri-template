@@ -86,14 +86,21 @@ class ExpressionTest extends Specification {
   }
 
   "Level 4 examples" should {
-    implicit val variables = Map(
+    implicit val variables: Map[String, Any] = Map(
       "var" -> "value",
       "hello" -> "Hello World!",
-      "empty" -> "",
       "path" -> "/foo/bar",
-      "x" -> "1024",
-      "y" -> "768"
+      "list" -> List("red", "green", "blue"),
+      "keys" -> Map("semi" -> ";", "dot" -> ".", "comma" -> ",")
     )
+    "String expansion with value modifiers" in {
+      "{var:3}".expand must be equalTo ("val")
+      "{var:30}".expand must be equalTo ("value")
+      "{list}".expand must be equalTo ("red,green,blue")
+      //      "{list*}".expand must be equalTo ("red,green,blue")
+      //        |     |    {keys}                semi,%3B,dot,.,comma,%2C         |
+      //      |     |    {keys*}               semi=%3B,dot=.,comma=%2C
+    }
   }
 
 
