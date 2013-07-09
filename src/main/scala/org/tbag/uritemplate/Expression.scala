@@ -17,7 +17,6 @@ class Expression(val expression: String) {
 
 
   private def parseToValue(identifier: String, variables: Map[String, Any]): (String, String) = {
-
     identifier.indexOf(":") match {
       case -1 => (identifier -> getValue(variables, identifier))
       case index => {
@@ -30,8 +29,15 @@ class Expression(val expression: String) {
 
 
   private def getValue(variables: Map[String, Any], identifier: String): String = {
-    variables.getOrElse(identifier, "") match {
+    val (ident, expansion) = identifier takeRight 1 match {
+      case "*" => (identifier dropRight 1, "=")
+      case _ => (identifier, ",")
+    }
+    variables.getOrElse(ident, "") match {
       case list: List[Any] => list.map(encode(_)) mkString (",")
+      case map: Map[Any, Any] => map.map {
+        case (a, b) => encode(a) + expansion + encode(b)
+      } mkString (",")
       case other => encode(other.toString)
     }
   }
