@@ -5,9 +5,15 @@ import java.net.URLEncoder
 
 class Expression(val expression: String) {
   //"{" [ operator ] variable-list "}"
-  private val (operator, identifiers) = expression.charAt(0).toString match {
-    case op@("+" | "#" | "." | "/" | ";" | "?" | "&") => (Some(op), expression.replace(op, ""))
-    case _ => (None, expression)
+  private val (operator, identifiers, explodeOp) = {
+    val (expr, explodeOp) = expression takeRight 1 match {
+      case "*" => (expression dropRight 1, Some)
+      case _ => (expression, None)
+    }
+    expr take 1 match {
+      case op@("+" | "#" | "." | "/" | ";" | "?" | "&") => (Some(op), expr.replace(op, ""), explodeOp)
+      case _ => (None, expr, explodeOp)
+    }
   }
 
 
@@ -29,19 +35,31 @@ class Expression(val expression: String) {
 
 
   private def getValue(variables: Map[String, Any], identifier: String, length: Option[Int] = None): String = {
-    val (ident, expansion) = identifier takeRight 1 match {
-      case "*" => (identifier dropRight 1, "=")
-      case _ => (identifier, ",")
-    }
-    variables.getOrElse(ident, "") match {
-      case list: List[Any] => list.map(encode(_)) mkString (",")
+    variables.getOrElse(identifier, "") match {
+      case list: List[Any] => list.map(encode(_)) mkString (chooseCollectionItemSeparator)
       case map: Map[Any, Any] => map.map {
-        case (a, b) => encode(a) + expansion + encode(b)
-      } mkString (",")
+        case (a, b) => encode(a) + {
+          explodeOp match {
+            case Some => "="
+            case _ => ","
+          }
+        } + encode(b)
+      } mkString (chooseCollectionItemSeparator)
       case other => encode(length match {
         case Some(x) => other.toString.take(x)
         case _ => other.toString
       })
+    }
+  }
+
+
+  private def chooseCollectionItemSeparator: String = {
+    explodeOp match {
+      case Some => operator match {
+        case Some(x) if (x == ".") => x
+        case _ => ","
+      }
+      case _ => ","
     }
   }
 

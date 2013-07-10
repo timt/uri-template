@@ -118,9 +118,9 @@ class ExpressionTest extends Specification {
     "Label expansion, dot-prefixed" in {
       "{.var:3}".expand must be equalTo (".val")
       "{.list}".expand must be equalTo (".red,green,blue")
-      //      "{.list*}".expand must be equalTo (".red.green.blue")
-      //      "{.keys}".expand must be equalTo (".semi,%3B,dot,.,comma,%2C")
-      //      "{.keys*}".expand must be equalTo (".semi=%3B.dot=..comma=%2C")
+      "{.list*}".expand must be equalTo (".red.green.blue")
+      "{.keys}".expand must be equalTo (".semi,%3B,dot,.,comma,%2C")
+      "{.keys*}".expand must be equalTo (".semi=%3B.dot=..comma=%2C")
     }
   }
 
