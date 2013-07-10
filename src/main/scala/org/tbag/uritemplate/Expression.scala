@@ -22,13 +22,13 @@ class Expression(val expression: String) {
       case index => {
         val actualIdentifier = identifier.substring(0, index)
         val length = identifier.substring(index + 1).toInt
-        (actualIdentifier -> encode(getValue(variables, actualIdentifier).take(length)))
+        (actualIdentifier -> getValue(variables, actualIdentifier, Some(length)))
       }
     }
   }
 
 
-  private def getValue(variables: Map[String, Any], identifier: String): String = {
+  private def getValue(variables: Map[String, Any], identifier: String, length: Option[Int] = None): String = {
     val (ident, expansion) = identifier takeRight 1 match {
       case "*" => (identifier dropRight 1, "=")
       case _ => (identifier, ",")
@@ -38,7 +38,10 @@ class Expression(val expression: String) {
       case map: Map[Any, Any] => map.map {
         case (a, b) => encode(a) + expansion + encode(b)
       } mkString (",")
-      case other => encode(other.toString)
+      case other => encode(length match {
+        case Some(x) => other.toString.take(x)
+        case _ => other.toString
+      })
     }
   }
 
@@ -77,6 +80,8 @@ class Expression(val expression: String) {
   private def reservedExpansion(value: String): String = value
     .replace("%21", "!")
     .replace("%2F", "/")
+    .replace("%3B", ";")
+    .replace("%2C", ",")
 
   private def encode(value: Any) = URLEncoder.encode(value.toString, "UTF-8").replace("+", "%20")
 

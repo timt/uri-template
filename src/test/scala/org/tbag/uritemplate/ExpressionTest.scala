@@ -101,6 +101,13 @@ class ExpressionTest extends Specification {
       "{keys}".expand must be equalTo ("semi,%3B,dot,.,comma,%2C")
       "{keys*}".expand must be equalTo ("semi=%3B,dot=.,comma=%2C")
     }
+    "Reserved expansion with value modifiers" in {
+      "{+path:6}".expand must be equalTo ("/foo/b")
+      "{+list}".expand must be equalTo ("red,green,blue")
+      "{+list*}".expand must be equalTo ("red,green,blue")
+      "{+keys}".expand must be equalTo ("semi,;,dot,.,comma,,")
+      "{+keys*}".expand must be equalTo ("semi=;,dot=.,comma=,")
+    }
   }
 
 
