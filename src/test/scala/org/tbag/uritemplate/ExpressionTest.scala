@@ -122,6 +122,21 @@ class ExpressionTest extends Specification {
       "{.keys}".expand must be equalTo (".semi,%3B,dot,.,comma,%2C")
       "{.keys*}".expand must be equalTo (".semi=%3B.dot=..comma=%2C")
     }
+    "Path segments, slash-prefixed" in {
+      "{/var:1,var}".expand must be equalTo ("/v/value")
+      "{/list}".expand must be equalTo ("/red,green,blue")
+      "{/list*}".expand must be equalTo ("/red/green/blue")
+      "{/list*,path:4}".expand must be equalTo ("/red/green/blue/%2Ffoo")
+      "{/keys}".expand must be equalTo ("/semi,%3B,dot,.,comma,%2C")
+      "{/keys*}".expand must be equalTo ("/semi=%3B/dot=./comma=%2C")
+    }
+    //    "Path-style parameters, semicolon-prefixed" in {
+    //      "{;hello:5}".expand must be equalTo (";hello=Hello")
+    //      "{;list}".expand must be equalTo (";list=red,green,blue")
+    //      "{;list*}".expand must be equalTo (";list=red;list=green;list=blue")
+    //      "{;keys}".expand must be equalTo (";keys=semi,%3B,dot,.,comma,%2C")
+    //      "{;keys*}".expand must be equalTo (";semi=%3B;dot=.;comma=%2C")
+    //    }
   }
 
 

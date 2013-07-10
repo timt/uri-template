@@ -5,14 +5,10 @@ import java.net.URLEncoder
 
 class Expression(val expression: String) {
   //"{" [ operator ] variable-list "}"
-  private val (operator, identifiers, explodeOp) = {
-    val (expr, explodeOp) = expression takeRight 1 match {
-      case "*" => (expression dropRight 1, Some)
-      case _ => (expression, None)
-    }
-    expr take 1 match {
-      case op@("+" | "#" | "." | "/" | ";" | "?" | "&") => (Some(op), expr.replace(op, ""), explodeOp)
-      case _ => (None, expr, explodeOp)
+  private val (operator, identifiers) = {
+    expression take 1 match {
+      case op@("+" | "#" | "." | "/" | ";" | "?" | "&") => (Some(op), expression.replace(op, ""))
+      case _ => (None, expression)
     }
   }
 
@@ -34,9 +30,13 @@ class Expression(val expression: String) {
   }
 
 
-  private def getValue(variables: Map[String, Any], identifier: String, length: Option[Int] = None): String = {
+  private def getValue(variables: Map[String, Any], ident: String, length: Option[Int] = None): String = {
+    val (identifier, explodeOp) = ident takeRight 1 match {
+      case "*" => (ident dropRight 1, Some)
+      case _ => (ident, None)
+    }
     variables.getOrElse(identifier, "") match {
-      case list: List[Any] => list.map(encode(_)) mkString (chooseCollectionItemSeparator)
+      case list: List[Any] => list.map(encode(_)) mkString chooseCollectionItemSeparator(explodeOp)
       case map: Map[Any, Any] => map.map {
         case (a, b) => encode(a) + {
           explodeOp match {
@@ -44,7 +44,7 @@ class Expression(val expression: String) {
             case _ => ","
           }
         } + encode(b)
-      } mkString (chooseCollectionItemSeparator)
+      } mkString chooseCollectionItemSeparator(explodeOp)
       case other => encode(length match {
         case Some(x) => other.toString.take(x)
         case _ => other.toString
@@ -53,10 +53,10 @@ class Expression(val expression: String) {
   }
 
 
-  private def chooseCollectionItemSeparator: String = {
+  private def chooseCollectionItemSeparator(explodeOp: Any): String = {
     explodeOp match {
       case Some => operator match {
-        case Some(x) if (x == ".") => x
+        case Some(x) if (x == "." || x == "/") => x
         case _ => ","
       }
       case _ => ","
@@ -64,8 +64,8 @@ class Expression(val expression: String) {
   }
 
   private def applyOperator(values: Seq[(String, String)]) = {
-    val valuesOnly = values.toMap.values
-    operator match {
+    val valuesOnly = values.map(_._2)
+    val retval: String = operator match {
       case Some("+") => reservedExpansion(mkString(valuesOnly, "", Some(",")))
       case Some("#") => reservedExpansion(mkString(valuesOnly, "#", Some(",")))
       case Some(".") => mkString(valuesOnly, ".")
@@ -76,6 +76,7 @@ class Expression(val expression: String) {
       case Some(op) => valuesOnly.mkString(",")
       case _ => valuesOnly.mkString(",")
     }
+    retval
   }
 
   private def withIdentifiers(values: Seq[(String, String)], suppressSeparatorWhenEmpty: Boolean = false) = {
