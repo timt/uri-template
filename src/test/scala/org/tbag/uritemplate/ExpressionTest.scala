@@ -71,7 +71,7 @@ class ExpressionTest extends Specification {
       "{/var}".expand must be equalTo ("/value")
       "{/var,x}".expand must be equalTo ("/value/1024")
     }
-    "Path-style parameters, semicolon-prefixed" in {
+    "Path-style parameters, semicolon-prefixed l3" in {
       "{;x,y}".expand must be equalTo (";x=1024;y=768")
       "{;x,y,empty}".expand must be equalTo (";x=1024;y=768;empty")
     }
@@ -93,7 +93,7 @@ class ExpressionTest extends Specification {
       "list" -> List("red", "green", "blue"),
       "keys" -> Map("semi" -> ";", "dot" -> ".", "comma" -> ",")
     )
-    "String expansion with value modifiers" in {
+    "String expansion with value modifiers l4" in {
       "{var:3}".expand must be equalTo ("val")
       "{var:30}".expand must be equalTo ("value")
       "{list}".expand must be equalTo ("red,green,blue")
@@ -115,13 +115,14 @@ class ExpressionTest extends Specification {
       "{#keys}".expand must be equalTo ("#semi,;,dot,.,comma,,")
       "{#keys*}".expand must be equalTo ("#semi=;,dot=.,comma=,")
     }
-    "Label expansion, dot-prefixed" in {
+    "Label expansion, dot-prefixed l4" in {
       "{.var:3}".expand must be equalTo (".val")
       "{.list}".expand must be equalTo (".red,green,blue")
       "{.list*}".expand must be equalTo (".red.green.blue")
       "{.keys}".expand must be equalTo (".semi,%3B,dot,.,comma,%2C")
       "{.keys*}".expand must be equalTo (".semi=%3B.dot=..comma=%2C")
     }
+
     "Path segments, slash-prefixed" in {
       "{/var:1,var}".expand must be equalTo ("/v/value")
       "{/list}".expand must be equalTo ("/red,green,blue")
@@ -130,13 +131,28 @@ class ExpressionTest extends Specification {
       "{/keys}".expand must be equalTo ("/semi,%3B,dot,.,comma,%2C")
       "{/keys*}".expand must be equalTo ("/semi=%3B/dot=./comma=%2C")
     }
-    //    "Path-style parameters, semicolon-prefixed" in {
-    //      "{;hello:5}".expand must be equalTo (";hello=Hello")
-    //      "{;list}".expand must be equalTo (";list=red,green,blue")
-    //      "{;list*}".expand must be equalTo (";list=red;list=green;list=blue")
-    //      "{;keys}".expand must be equalTo (";keys=semi,%3B,dot,.,comma,%2C")
-    //      "{;keys*}".expand must be equalTo (";semi=%3B;dot=.;comma=%2C")
-    //    }
+    "Path-style parameters, semicolon-prefixed l4" in {
+      "{;hello:5}".expand must be equalTo (";hello=Hello")
+      "{;list}".expand must be equalTo (";list=red,green,blue")
+      "{;list*}".expand must be equalTo (";list=red;list=green;list=blue")
+      "{;keys}".expand must be equalTo (";keys=semi,%3B,dot,.,comma,%2C")
+      //      "{;keys*}".expand must be equalTo (";semi=%3B;dot=.;comma=%2C")
+    }
+    "Form-style query, ampersand-separated" in {
+      "{?var:3}".expand must be equalTo ("?var=val")
+      "{?list}".expand must be equalTo ("?list=red,green,blue")
+      //      "{?list*}".expand must be equalTo ("?list=red&list=green&list=blue")
+      "{?keys}".expand must be equalTo ("?keys=semi,%3B,dot,.,comma,%2C")
+      //      "{?keys*}".expand must be equalTo ("?semi=%3B&dot=.&comma=%2C")
+    }
+
+    "Form-style query continuation" in {
+      "{&var:3}".expand must be equalTo ("&var=val")
+      "{&list}".expand must be equalTo ("&list=red,green,blue")
+      //      "{&list*}".expand must be equalTo ("&list=red&list=green&list=blue")
+      "{&keys}".expand must be equalTo ("&keys=semi,%3B,dot,.,comma,%2C")
+      //      "{&keys*}".expand must be equalTo ("&semi=%3B&dot=.&comma=%2C")
+    }
   }
 
 
