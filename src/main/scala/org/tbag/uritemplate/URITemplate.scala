@@ -3,15 +3,13 @@ package org.tbag.uritemplate
 
 case class URITemplate(template: String) {
   val expressionsRegex = """\{([^/]+?)\}""".r
-  //  val expressions = (expressionsRegex findAllIn template).toList
-  //  val queryExpression = expressions.find(_.startsWith("{?"))
 
   def expand(variables: (String, Any)*): String = {
     expressionsRegex.replaceAllIn(template, m => expandExpression(m.group(0), variables.toMap))
   }
 
   private def expandExpression(expression: String, variables: Map[String, Any]): String = {
-    expandQueryParamsExpression(expression, variables)
+    Expression(expression) expand variables
   }
 
 

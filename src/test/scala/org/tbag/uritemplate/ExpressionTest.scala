@@ -155,6 +155,21 @@ class ExpressionTest extends Specification {
     }
   }
 
+  //  "First examples in spec about uri params" should {
+  //    "works" in {
+  //      implicit val variables: Map[String, Any] = Map("query" -> "mycelium", "number" -> 100)
+  //      "{?query,number}".expand must be equalTo("?query=mycelium&number=100")
+  //    }
+  //    "only use those parameters provided" in {
+  //      implicit val variables: Map[String, Any] = Map("number" -> 100)
+  //      "{?query,number}".expand must be equalTo("?number=100")
+  //    }
+  //    "when no varaiables no params" in {
+  //      implicit val variables: Map[String, Any] = Map()
+  //      "{?query,number}".expand must be equalTo("")
+  //    }
+  //  }
+
 
   implicit def toExpression(expression: String): Expression = Expression(expression)
 

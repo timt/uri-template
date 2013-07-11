@@ -20,11 +20,11 @@ class Expression(val expression: String) {
 
   private def parseToValue(identifier: String, variables: Map[String, Any]): (String, Any) = {
     identifier.indexOf(":") match {
-      case -1 => (identifier -> getValue(variables, identifier))
+      case -1 => identifier -> getValue(variables, identifier)
       case index => {
         val actualIdentifier = identifier.substring(0, index)
         val length = identifier.substring(index + 1).toInt
-        (actualIdentifier -> getValue(variables, actualIdentifier, Some(length)))
+        actualIdentifier -> getValue(variables, actualIdentifier, Some(length))
       }
     }
   }
@@ -47,28 +47,13 @@ class Expression(val expression: String) {
     }
   }
 
-  @Deprecated
-  private def chooseCollectionItemSeparator(explodeOp: Any, identifier: Option[String] = None): String = {
-    explodeOp match {
-      case Some => operator match {
-        case Some(x) if x == "." || x == "/" => x
-        case Some(x) if x == ";" => identifier match {
-          case None => x
-          case Some(ident) => s"$x$ident="
-        }
-        case _ => ","
-      }
-      case _ => ","
-    }
-  }
-
   private def applyOperator(values: Seq[(String, Any)]) = {
     val retval: String = operator match {
       case Some("+") => reservedExpansion(mkString(values, "", Some(",")))
       case Some("#") => reservedExpansion(mkString(values, "#", Some(",")))
       case Some(".") => mkString(values, ".")
       case Some("/") => mkString(values, "/")
-      case Some(";") => mkString(values, ";", withIdentifiers = addIdentifiers(true))
+      case Some(";") => mkString(values, ";", withIdentifiers = addIdentifiers(suppressSeparatorWhenEmpty = true))
       case Some("?") => mkString(values, "?", Some("&"), addIdentifiers())
       case Some("&") => mkString(values, "&", withIdentifiers = addIdentifiers())
       case _ => mkString(values, "", Some(","))
@@ -78,7 +63,7 @@ class Expression(val expression: String) {
 
   private def addIdentifiers(suppressSeparatorWhenEmpty: Boolean = false) = (identifier: String, value: String) => {
     value match {
-      case "" if (suppressSeparatorWhenEmpty) => identifier
+      case "" if suppressSeparatorWhenEmpty => identifier
       case _ => s"$identifier=$value"
     }
   }
@@ -94,8 +79,8 @@ class Expression(val expression: String) {
       underlyingValue match {
         case list: List[Any] => {
           explodeOp match {
-            case Some => list.map(value => withIdentifiers(identifier, encode(value))) mkString (toCollectionSeparator(explodeOp, separator))
-            case _ => withIdentifiers(identifier, list.map(encode(_)) mkString (toCollectionSeparator(explodeOp, separator)))
+            case Some => list.map(value => withIdentifiers(identifier, encode(value))) mkString toCollectionSeparator(explodeOp, separator)
+            case _ => withIdentifiers(identifier, list.map(encode(_)) mkString toCollectionSeparator(explodeOp, separator))
           }
         }
         case map: Map[Any, Any] => val mapAsString: String = map.map {
