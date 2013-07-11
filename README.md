@@ -14,7 +14,7 @@ Add the following lines to your build.sbt
 
     resolvers += "Tim Tennant's repo" at "http://timt.github.com/repo/releases/"
 
-    addSbtPlugin("org.tbag" % "uri-template" % "0.1")
+    libraryDependencies += "org.tbag" %% "uri-template" % "0.1"
 
 Cookbook
 --------
