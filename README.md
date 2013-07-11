@@ -24,7 +24,7 @@ Cookbook
         "number" -> 100
     )
 
-Expands to http://www.example.com/foo?query=mycelium&number=100")
+Expands to http://www.example.com/foo?query=mycelium&number=100
 
 License
 -------
