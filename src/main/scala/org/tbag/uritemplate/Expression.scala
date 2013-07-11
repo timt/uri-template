@@ -17,14 +17,20 @@ class Expression(val expression: String) {
     applyOperator(identifiers.split(",").map(identifier => parseToValue(identifier, variables)).filter(entry => variableFilter(entry._2)))
   }
 
-  private def variableFilter(value: Any) = {
-    value != null && (value match {
-      case map: Map[Any, Any] => !map.isEmpty
-      case _ => true
-    })
+  private def variableFilter(value: Option[Any]) = {
+    value match {
+      case Some(item) => {
+        item match {
+          case null => false
+          case map: Map[Any, Any] => !map.isEmpty
+          case _ => true
+        }
+      }
+      case None => false
+    }
   }
 
-  private def parseToValue(identifier: String, variables: Map[String, Any]): (String, Any) = {
+  private def parseToValue(identifier: String, variables: Map[String, Any]): (String, Option[Any]) = {
     identifier.indexOf(":") match {
       case -1 => identifier -> getValue(variables, identifier)
       case index => {
@@ -36,12 +42,16 @@ class Expression(val expression: String) {
   }
 
 
-  private def getValue(variables: Map[String, Any], ident: String, length: Option[Int] = None): Any = {
+  private def getValue(variables: Map[String, Any], ident: String, length: Option[Int] = None): Option[Any] = {
     val (identifier, _) = separateFromExplodeOp(ident)
-    val value = variables.getOrElse(identifier, null)
-    length match {
-      case Some(x) => value.toString.take(x)
-      case _ => value
+    variables.get(identifier) match {
+      case Some(value) => {
+        length match {
+          case Some(x) => Some(value.toString.take(x))
+          case _ => Some(value)
+        }
+      }
+      case _ => None
     }
   }
 
@@ -53,7 +63,7 @@ class Expression(val expression: String) {
     }
   }
 
-  private def applyOperator(values: Seq[(String, Any)]) = {
+  private def applyOperator(values: Seq[(String, Option[Any])]) = {
     val retval: String = operator match {
       case Some("+") => reservedExpansion(mkString(values, "", Some(",")))
       case Some("#") => reservedExpansion(mkString(values, "#", Some(",")))
@@ -77,11 +87,11 @@ class Expression(val expression: String) {
   private val dontAddIdentifiers = (id: String, value: String) => value
 
 
-  private def mkString(values: Seq[(String, Any)], prefix: String, sep: Option[String] = None, withIdentifiers: (String, String) => String = dontAddIdentifiers) = {
+  private def mkString(values: Seq[(String, Option[Any])], prefix: String, sep: Option[String] = None, withIdentifiers: (String, String) => String = dontAddIdentifiers) = {
     val separator = sep.getOrElse(prefix)
     val stringValues = values.map(value => {
       val (identifier, explodeOp) = separateFromExplodeOp(value._1)
-      val underlyingValue: Any = value._2
+      val underlyingValue: Any = value._2.get
       underlyingValue match {
         case list: List[Any] => {
           explodeOp match {
