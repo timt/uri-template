@@ -98,40 +98,23 @@ class Expression(val expression: String) {
             case _ => withIdentifiers(identifier, list.map(encode(_)) mkString (toCollectionSeparator(explodeOp, separator)))
           }
         }
-        case map: Map[Any, Any] => withIdentifiers(identifier, map.map {
+        case map: Map[Any, Any] => val mapAsString: String = map.map {
           case (a, b) => encode(a) + {
             explodeOp match {
               case Some => "="
               case _ => ","
             }
           } + encode(b)
-        } mkString toCollectionSeparator(explodeOp, separator))
+        } mkString toCollectionSeparator(explodeOp, separator)
+          explodeOp match {
+            case Some => mapAsString
+            case None => withIdentifiers(identifier, mapAsString)
+          }
         case other => withIdentifiers(identifier, encode(other.toString))
       }
     })
     val retval = s"$prefix${stringValues.mkString(separator) }"
     retval
-    //    s"$prefix${values.mkString(separator.getOrElse(prefix))}"
-
-    //Do stuff here???
-    /*
-    match {
-      case list: List[Any] => list.map(encode(_)) mkString chooseCollectionItemSeparator(explodeOp, Some(identifier))
-      case map: Map[Any, Any] => map.map {
-        case (a, b) => encode(a) + {
-          explodeOp match {
-            case Some => "="
-            case _ => ","
-          }
-        } + encode(b)
-      } mkString chooseCollectionItemSeparator(explodeOp)
-      case other => encode(length match {
-        case Some(x) => other.toString.take(x)
-        case _ => other.toString
-      })
-    }
-     */
-
   }
 
 

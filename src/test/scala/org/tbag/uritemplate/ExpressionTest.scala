@@ -136,22 +136,22 @@ class ExpressionTest extends Specification {
       "{;list}".expand must be equalTo (";list=red,green,blue")
       "{;list*}".expand must be equalTo (";list=red;list=green;list=blue")
       "{;keys}".expand must be equalTo (";keys=semi,%3B,dot,.,comma,%2C")
-      //      "{;keys*}".expand must be equalTo (";semi=%3B;dot=.;comma=%2C")
+      "{;keys*}".expand must be equalTo (";semi=%3B;dot=.;comma=%2C")
     }
     "Form-style query, ampersand-separated" in {
       "{?var:3}".expand must be equalTo ("?var=val")
       "{?list}".expand must be equalTo ("?list=red,green,blue")
-      //      "{?list*}".expand must be equalTo ("?list=red&list=green&list=blue")
+      "{?list*}".expand must be equalTo ("?list=red&list=green&list=blue")
       "{?keys}".expand must be equalTo ("?keys=semi,%3B,dot,.,comma,%2C")
-      //      "{?keys*}".expand must be equalTo ("?semi=%3B&dot=.&comma=%2C")
+      "{?keys*}".expand must be equalTo ("?semi=%3B&dot=.&comma=%2C")
     }
 
     "Form-style query continuation" in {
       "{&var:3}".expand must be equalTo ("&var=val")
       "{&list}".expand must be equalTo ("&list=red,green,blue")
-      //      "{&list*}".expand must be equalTo ("&list=red&list=green&list=blue")
+      "{&list*}".expand must be equalTo ("&list=red&list=green&list=blue")
       "{&keys}".expand must be equalTo ("&keys=semi,%3B,dot,.,comma,%2C")
-      //      "{&keys*}".expand must be equalTo ("&semi=%3B&dot=.&comma=%2C")
+      "{&keys*}".expand must be equalTo ("&semi=%3B&dot=.&comma=%2C")
     }
   }
 
