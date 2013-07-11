@@ -1,13 +1,9 @@
 **uri-template** is a scala implementation of [RFC 6570](http://tools.ietf.org/html/rfc6570) - URI Template
 
-
-
-
 Requirements
 ------------
 
 * [scala](http://www.scala-lang.org) 2.10.2
-
 
 Installation
 ------------
@@ -22,8 +18,13 @@ Add the following lines to your build.sbt
 
 Cookbook
 --------
+    val uriTemplate = URITemplate("http://www.example.com/foo{?query,number}")
+    uriTemplate.expand(
+        "query" -> "mycelium",
+        "number" -> 100
+    )
 
-
+Expands to http://www.example.com/foo?query=mycelium&number=100")
 
 License
 -------
