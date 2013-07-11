@@ -154,22 +154,184 @@ class ExpressionTest extends Specification {
       "{&keys*}".expand must be equalTo ("&semi=%3B&dot=.&comma=%2C")
     }
   }
+  "2.4.1.  Prefix Values examples" should {
+    implicit val variables: Map[String, Any] = Map(
+      "var" -> "value",
+      "semi" -> ";"
+    )
+    "work" in {
+      "{var}".expand must be equalTo ("value")
+      "{var:20}".expand must be equalTo ("value")
+      "{var:3".expand must be equalTo ("val")
+      "{semi}".expand must be equalTo ("%3B")
+      "{semi:2}".expand must be equalTo ("%3B")
+    }
+  }
+  "2.4.2.  Composite Values examples" should {
+    implicit val variables: Map[String, Any] = Map(
+      "year" -> List("1965", "2000", "2012"),
+      "dom" -> List("example", "com")
+    )
+    "work" in {
+      "{?year*}".expand must be equalTo ("?year=1965&year=2000&year=2012")
+      "{.dom*}".expand must be equalTo (".example.com")
+    }
+  }
+  "3.  Expansion examples" should {
+    implicit val variables: Map[String, Any] = Map(
+      "count" -> List("one", "two", "three"),
+      "dom" -> List("example", "com"),
+      "dub" -> "me/too",
+      "hello" -> "Hello World!",
+      "half" -> "50%",
+      "var" -> "value",
+      "who" -> "fred",
+      "base" -> "http://example.com/home/",
+      "path" -> "/foo/bar",
+      "list" -> List("red", "green", "blue"),
+      "keys" -> Map("semi" -> ";", "dot" -> ".", "comma" -> ","),
+      "v" -> "6",
+      "x" -> "1024",
+      "y" -> "768",
+      "empty" -> "",
+      "empty_keys" -> Map[String, Any](),
+      "undef" -> null
+    )
+    "3.2.1.  Variable Expansion examples" in {
+      "{count}".expand must be equalTo ("one,two,three")
+      "{count*}".expand must be equalTo ("one,two,three")
+      "{/count}".expand must be equalTo ("/one,two,three")
+      "{/count*}".expand must be equalTo ("/one/two/three")
+      "{;count}".expand must be equalTo (";count=one,two,three")
+      "{;count*}".expand must be equalTo (";count=one;count=two;count=three")
+      "{?count}".expand must be equalTo ("?count=one,two,three")
+      "{?count*}".expand must be equalTo ("?count=one&count=two&count=three")
+      "{&count*}".expand must be equalTo ("&count=one&count=two&count=three")
+    }
+    "3.2.2.  Simple String Expansion: {var} examples" in {
+      "{var}".expand must be equalTo ("value")
+      "{hello}".expand must be equalTo ("Hello%20World%21")
+      "{half}".expand must be equalTo ("50%25")
+      "{empty}".expand must be equalTo ("")
+      "{undef}".expand must be equalTo ("")
+      "{x,y}".expand must be equalTo ("1024,768")
+      "{x,hello,y}".expand must be equalTo ("1024,Hello%20World%21,768")
+      "{x,empty}".expand must be equalTo ("1024,")
+      "{x,undef}".expand must be equalTo ("1024")
+      "{undef,y}".expand must be equalTo ("768")
+      "{var:3}".expand must be equalTo ("val")
+      "{var:30}".expand must be equalTo ("value")
+      "{list}".expand must be equalTo ("red,green,blue")
+      "{list*}".expand must be equalTo ("red,green,blue")
+      "{keys}".expand must be equalTo ("semi,%3B,dot,.,comma,%2C")
+      "{keys*}".expand must be equalTo ("semi=%3B,dot=.,comma=%2C")
+    }
+    "3.2.3.  Reserved Expansion: {+var} examples" in {
+      "{+var}".expand must be equalTo ("value")
+      "{+hello}".expand must be equalTo ("Hello%20World!")
+      "{+half}".expand must be equalTo ("50%25")
+      "{base}".expand must be equalTo ("http%3A%2F%2Fexample.com%2Fhome%2F")
+      "{+base}".expand must be equalTo ("http://example.com/home/")
+      "{+empty}".expand must be equalTo ("")
+      "{+undef}".expand must be equalTo ("")
+      "{+path}".expand must be equalTo ("/foo/bar")
+      "{+path}".expand must be equalTo ("/foo/bar")
+      "{+x,hello,y}".expand must be equalTo ("1024,Hello%20World!,768")
+      "{+path,x}".expand must be equalTo ("/foo/bar,1024")
+      "{+path:6}".expand must be equalTo ("/foo/b")
+      "{+list}".expand must be equalTo ("red,green,blue")
+      "{+list*}".expand must be equalTo ("red,green,blue")
+      "{+keys}".expand must be equalTo ("semi,;,dot,.,comma,,")
+      "{+keys*}".expand must be equalTo ("semi=;,dot=.,comma=,")
+    }
+    "3.2.4.  Fragment Expansion: {#var} examples" in {
+      "{#var}".expand must be equalTo ("#value")
+      "{#hello}".expand must be equalTo ("#Hello%20World!")
+      "{#half}".expand must be equalTo ("#50%25")
+      "{#empty}".expand must be equalTo ("#")
+      "{#undef}".expand must be equalTo ("")
+      "{#x,hello,y}".expand must be equalTo ("#1024,Hello%20World!,768")
+      "{#path,x}".expand must be equalTo ("#/foo/bar,1024")
+      "{#path:6}".expand must be equalTo ("#/foo/b")
+      "{#list}".expand must be equalTo ("#red,green,blue")
+      "{#list*}".expand must be equalTo ("#red,green,blue")
+      "{#keys}".expand must be equalTo ("#semi,;,dot,.,comma,,")
+      "{#keys*}".expand must be equalTo ("#semi=;,dot=.,comma=,")
 
-  //  "First examples in spec about uri params" should {
-  //    "works" in {
-  //      implicit val variables: Map[String, Any] = Map("query" -> "mycelium", "number" -> 100)
-  //      "{?query,number}".expand must be equalTo("?query=mycelium&number=100")
-  //    }
-  //    "only use those parameters provided" in {
-  //      implicit val variables: Map[String, Any] = Map("number" -> 100)
-  //      "{?query,number}".expand must be equalTo("?number=100")
-  //    }
-  //    "when no varaiables no params" in {
-  //      implicit val variables: Map[String, Any] = Map()
-  //      "{?query,number}".expand must be equalTo("")
-  //    }
-  //  }
 
+    }
+    "3.2.5.  Label Expansion with Dot-Prefix: {.var} examples" in {
+      "{.who}".expand must be equalTo (".fred")
+      "{.who,who}".expand must be equalTo (".fred.fred")
+      "{.half,who}".expand must be equalTo (".50%25.fred")
+      "{.dom*}".expand must be equalTo (".example.com")
+      "{.var}".expand must be equalTo (".value")
+      "{.empty}".expand must be equalTo (".")
+      "{.undef}".expand must be equalTo ("")
+      "{.var:3}".expand must be equalTo (".val")
+      "{.list}".expand must be equalTo (".red,green,blue")
+      "{.list*}".expand must be equalTo (".red.green.blue")
+      "{.keys}".expand must be equalTo (".semi,%3B,dot,.,comma,%2C")
+      "{.keys*}".expand must be equalTo (".semi=%3B.dot=..comma=%2C")
+      "{.empty_keys}".expand must be equalTo ("")
+      "{.empty_keys*}".expand must be equalTo ("")
+    }
+    "3.2.6.  Path Segment Expansion: {/var} examples" in {
+      "{/who}".expand must be equalTo ("/fred")
+      "{/who,who}".expand must be equalTo ("/fred/fred")
+      "{/half,who}".expand must be equalTo ("/50%25/fred")
+      "{/who,dub}".expand must be equalTo ("/fred/me%2Ftoo")
+      "{/var}".expand must be equalTo ("/value")
+      "{/var,empty}".expand must be equalTo ("/value/")
+      "{/var,undef}".expand must be equalTo ("/value")
+      "{/var,x}".expand must be equalTo ("/value/1024")
+      "{/var:1,var}".expand must be equalTo ("/v/value")
+      "{/list}".expand must be equalTo ("/red,green,blue")
+      "{/list*}".expand must be equalTo ("/red/green/blue")
+      "{/list*,path:4}".expand must be equalTo ("/red/green/blue/%2Ffoo")
+      "{/keys}".expand must be equalTo ("/semi,%3B,dot,.,comma,%2C")
+      "{/keys*}".expand must be equalTo ("/semi=%3B/dot=./comma=%2C")
+    }
+    "3.2.7 Path-Style Parameter Expansion: {;var} examples" in {
+      "{;who}".expand must be equalTo (";who=fred")
+      "{;half}".expand must be equalTo (";half=50%25")
+      "{;empty}".expand must be equalTo (";empty")
+      "{;v,empty,who}".expand must be equalTo (";v=6;empty;who=fred")
+      "{;v,bar,who}".expand must be equalTo (";v=6;who=fred")
+      "{;x,y}".expand must be equalTo (";x=1024;y=768")
+      "{;x,y,empty}".expand must be equalTo (";x=1024;y=768;empty")
+      "{;x,y,undef}".expand must be equalTo (";x=1024;y=768")
+      "{;hello:5}".expand must be equalTo (";hello=Hello")
+      "{;list}".expand must be equalTo (";list=red,green,blue")
+      "{;list*}".expand must be equalTo (";list=red;list=green;list=blue")
+      "{;keys}".expand must be equalTo (";keys=semi,%3B,dot,.,comma,%2C")
+      "{;keys*}".expand must be equalTo (";semi=%3B;dot=.;comma=%2C")
+    }
+    "3.2.8.  Form-Style Query Expansion: {?var}" in {
+      "{?who}".expand must be equalTo ("?who=fred")
+      "{?half}".expand must be equalTo ("?half=50%25")
+      "{?x,y}".expand must be equalTo ("?x=1024&y=768")
+      "{?x,y,empty}".expand must be equalTo ("?x=1024&y=768&empty=")
+      "{?x,y,undef}".expand must be equalTo ("?x=1024&y=768")
+      "{?var:3}".expand must be equalTo ("?var=val")
+      "{?list}".expand must be equalTo ("?list=red,green,blue")
+      "{?list*}".expand must be equalTo ("?list=red&list=green&list=blue")
+      "{?keys}".expand must be equalTo ("?keys=semi,%3B,dot,.,comma,%2C")
+      "{?keys*}".expand must be equalTo ("?semi=%3B&dot=.&comma=%2C")
+    }
+    "3.2.9.  Form-Style Query Continuation: {&var}" in {
+      "{&who}".expand must be equalTo ("&who=fred")
+      "{&half}".expand must be equalTo ("&half=50%25")
+      "{&x}".expand must be equalTo ("&x=1024")
+      "{&x,y,empty}".expand must be equalTo ("&x=1024&y=768&empty=")
+      "{&x,y,undef}".expand must be equalTo ("&x=1024&y=768")
+      "{&var:3}".expand must be equalTo ("&var=val")
+      "{&list}".expand must be equalTo ("&list=red,green,blue")
+      "{&list*}".expand must be equalTo ("&list=red&list=green&list=blue")
+      "{&keys}".expand must be equalTo ("&keys=semi,%3B,dot,.,comma,%2C")
+      "{&keys*}".expand must be equalTo ("&semi=%3B&dot=.&comma=%2C")
+    }
+  }
 
   implicit def toExpression(expression: String): Expression = Expression(expression)
 

@@ -14,9 +14,15 @@ class Expression(val expression: String) {
 
 
   def expand(implicit variables: Map[String, Any]) = {
-    applyOperator(identifiers.split(",").map(identifier => parseToValue(identifier, variables)))
+    applyOperator(identifiers.split(",").map(identifier => parseToValue(identifier, variables)).filter(entry => variableFilter(entry._2)))
   }
 
+  private def variableFilter(value: Any) = {
+    value != null && (value match {
+      case map: Map[Any, Any] => !map.isEmpty
+      case _ => true
+    })
+  }
 
   private def parseToValue(identifier: String, variables: Map[String, Any]): (String, Any) = {
     identifier.indexOf(":") match {
@@ -32,7 +38,7 @@ class Expression(val expression: String) {
 
   private def getValue(variables: Map[String, Any], ident: String, length: Option[Int] = None): Any = {
     val (identifier, _) = separateFromExplodeOp(ident)
-    val value = variables.getOrElse(identifier, "")
+    val value = variables.getOrElse(identifier, null)
     length match {
       case Some(x) => value.toString.take(x)
       case _ => value
@@ -98,7 +104,9 @@ class Expression(val expression: String) {
         case other => withIdentifiers(identifier, encode(other.toString))
       }
     })
-    val retval = s"$prefix${stringValues.mkString(separator) }"
+    val retval = s"${
+      if (stringValues.isEmpty) "" else prefix
+    }${stringValues.mkString(separator) }"
     retval
   }
 
@@ -115,6 +123,7 @@ class Expression(val expression: String) {
     .replace("%2F", "/")
     .replace("%3B", ";")
     .replace("%2C", ",")
+    .replace("%3A", ":")
 
   private def encode(value: Any) = URLEncoder.encode(value.toString, "UTF-8").replace("+", "%20")
 
